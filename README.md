@@ -10,8 +10,8 @@ Team:
 
 [Zijin Jiang](https://www.linkedin.com/in/zijin-jiang/)
 
-Somya Mittal
+[Somya Mittal](https://www.linkedin.com/in/somya-mittal/)
 
-Haolin Yang 
+[Haolin Yang](https://www.linkedin.com/in/haolinyang/) 
 
 @CMU Fall 2021
