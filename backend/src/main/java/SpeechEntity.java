@@ -1,6 +1,5 @@
-import java.io.Serializable;
 
-public class SpeechEntity implements Serializable {
+public class SpeechEntity{
     private String name;
     private double sentiment;
     private String type;
