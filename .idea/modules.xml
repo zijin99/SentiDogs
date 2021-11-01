@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/SEM-SentiDog.iml" filepath="$PROJECT_DIR$/.idea/SEM-SentiDog.iml" />
+      <module fileurl="file://$PROJECT_DIR$/Speech/Speech.iml" filepath="$PROJECT_DIR$/Speech/Speech.iml" />
     </modules>
   </component>
 </project>
