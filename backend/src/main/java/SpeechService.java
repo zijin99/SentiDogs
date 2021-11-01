@@ -1,6 +1,11 @@
 import com.google.cloud.speech.v1.*;
 import com.google.protobuf.ByteString;
+import ws.schild.jave.Encoder;
+import ws.schild.jave.MultimediaObject;
+import ws.schild.jave.encode.AudioAttributes;
+import ws.schild.jave.encode.EncodingAttributes;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -39,6 +44,22 @@ public class SpeechService {
             System.err.println("Failed to create the client due to: " + exception);
         }
         return "";
+    }
+
+    public void convertToWav (String fileName) {
+        try {
+            File source2 = new File("/Users/yanghaolin/Desktop/Restaurant.mp4");
+            File target2 = new File("/Users/yanghaolin/Desktop/Restaurant.wav");
+            AudioAttributes audio2 = new AudioAttributes();
+            audio2.setCodec("pcm_s16le");
+            EncodingAttributes attrs2 = new EncodingAttributes();
+            attrs2.setOutputFormat("wav");
+            attrs2.setAudioAttributes(audio2);
+            Encoder encoder2 = new Encoder();
+            encoder2.encode(new MultimediaObject(source2), target2, attrs2);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public String generatePath(String fileName) {
         return "/Users/yanghaolin/Desktop/MP4/restaurant.wav";
