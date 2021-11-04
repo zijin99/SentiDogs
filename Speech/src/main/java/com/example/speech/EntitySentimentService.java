@@ -2,17 +2,22 @@ package com.example.speech;
 
 import com.google.api.gax.core.CredentialsProvider;
 import com.google.cloud.language.v1.*;
-import com.google.cloud.speech.v1.SpeechSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Component
 public class EntitySentimentService {
-
+    private static HttpURLConnection con;
     private CredentialsProvider credentialsProvider;
     @Autowired
     public void setCredentialsProvider(CredentialsProvider credentialsProvider) {
@@ -34,14 +39,14 @@ public class EntitySentimentService {
                             .build();
 
             AnalyzeEntitySentimentResponse response = language.analyzeEntitySentiment(request);
-            Map<String, Double> map = new HashMap<>();
+            List<SpeechEntity> entityList = new ArrayList<>();
             List<SpeechEntity> result = new ArrayList<>();
             // Print the response
             for (Entity entity : response.getEntitiesList()) {
                 System.out.printf("Entity: %s\n", entity.getName());
                 System.out.printf("Salience: %.3f\n", entity.getSalience());
                 System.out.println("Metadata: ");
-                System.out.println("Type" + entity.getType());
+                System.out.println("Type: " + entity.getType());
                 for (Map.Entry<String, String> entry : entity.getMetadataMap().entrySet()) {
                     System.out.printf("%s : %s", entry.getKey(), entry.getValue());
                 }
@@ -53,9 +58,56 @@ public class EntitySentimentService {
 
                     System.out.printf("Type: %s\n\n", mention.getType());
                 }
-                result.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name()));
-                map.put(entity.getName(), (double) entity.getSentiment().getScore());
+                if (entity.getType().name().equalsIgnoreCase("organization") || entity.getType().name().equalsIgnoreCase("location")) {
+                    entityList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name()));
+                }
+
             }
+
+            //call the restaurant detector api
+            var url = "https://som-restaurant-detector.azurewebsites.net/detect";
+            for (var entity: entityList) {
+                try {
+
+                    var myurl = new URL(url);
+                    con = (HttpURLConnection) myurl.openConnection();
+
+                    con.setDoOutput(true);
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("User-Agent", "Java client");
+                    con.setRequestProperty("Content-Type", "application/json");
+
+                    var data = "{\"text\":\"" + entity.getName() + "\"}";
+                    byte[] postData = data.getBytes(StandardCharsets.UTF_8);
+                    try (var wr = new DataOutputStream(con.getOutputStream())) {
+                        wr.write(postData);
+                    }
+
+                    StringBuilder content;
+
+                    try (var br = new BufferedReader(
+                            new InputStreamReader(con.getInputStream()))) {
+
+                        String line;
+                        content = new StringBuilder();
+
+                        while ((line = br.readLine()) != null) {
+                            content.append(line);
+                            content.append(System.lineSeparator());
+                        }
+                    }
+
+                    System.out.println(content.toString());
+                    if (content.toString().trim().equalsIgnoreCase("yes")) {
+                        result.add(entity);
+                    }
+
+                } finally {
+
+                    con.disconnect();
+                }
+            }
+
             return result;
         } catch (Exception e) {
             e.printStackTrace();
