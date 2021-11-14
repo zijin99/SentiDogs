@@ -125,7 +125,7 @@ public class SpeechService {
         return "";
     }
     public String generatePath(String fileName) {
-        String str = "gs://cmu-video-upload/" + fileName + ".wav";
+        String str = "gs://test-senti-frontend.appspot.com/" + fileName;
         return str;
     }
 }
