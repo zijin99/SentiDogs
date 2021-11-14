@@ -23,7 +23,18 @@ public class ServiceController {
     @Autowired
     private EntitySentimentService entitySentimentService;
 
+    @Autowired
+    private StorageService storageService;
 
+    @RequestMapping(value = "download")
+    @ResponseBody
+    public void download() {
+        try {
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
 
     @RequestMapping(value = "file/{fileName}")
