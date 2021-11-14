@@ -1,6 +1,7 @@
 package com.example.speech;
 
 import com.google.api.gax.core.CredentialsProvider;
+import com.google.cloud.speech.v1.SpeechSettings;
 import com.google.cloud.storage.*;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,20 +42,23 @@ public class StorageService {
 
         // The path to which the file should be downloaded
         // String destFilePath = "/local/path/to/file.txt";
+        try {
+            Storage storage = StorageOptions.newBuilder().setCredentials(credentialsProvider.getCredentials()).setProjectId(projectId).build().getService();
 
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+            Blob blob = storage.get(BlobId.of(bucketName, objectName));
+            blob.downloadTo(Paths.get(destFilePath));
 
-        Blob blob = storage.get(BlobId.of(bucketName, objectName));
-        blob.downloadTo(Paths.get(destFilePath));
-
-        System.out.println(
-                "Downloaded object "
-                        + objectName
-                        + " from bucket name "
-                        + bucketName
-                        + " to "
-                        + destFilePath);
-        convertToWav(fileFullName);
+            System.out.println(
+                    "Downloaded object "
+                            + objectName
+                            + " from bucket name "
+                            + bucketName
+                            + " to "
+                            + destFilePath);
+            convertToWav(fileFullName);
+        }catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void uploadObject(
@@ -71,7 +75,7 @@ public class StorageService {
         // The path to your file to upload
         // String filePath = "path/to/your/file"
 
-        Storage storage = StorageOptions.newBuilder().setProjectId(projectId).build().getService();
+        Storage storage = StorageOptions.newBuilder().setCredentials(credentialsProvider.getCredentials()).setProjectId(projectId).build().getService();
         BlobId blobId = BlobId.of(bucketName, objectName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 
