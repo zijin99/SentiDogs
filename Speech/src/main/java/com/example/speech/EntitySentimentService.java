@@ -59,7 +59,7 @@ public class EntitySentimentService {
                     System.out.printf("Type: %s\n\n", mention.getType());
                 }
                 if (entity.getType().name().equalsIgnoreCase("organization") || entity.getType().name().equalsIgnoreCase("location")) {
-                    entityList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name()));
+                    entityList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
                 }
 
             }

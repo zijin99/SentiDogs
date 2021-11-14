@@ -5,10 +5,7 @@ import com.google.api.gax.core.CredentialsProvider;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.SpeechSettings;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
 import java.io.FileInputStream;
@@ -23,10 +20,7 @@ public class ServiceController {
     @Autowired
     private EntitySentimentService entitySentimentService;
 
-
-
-
-    @RequestMapping(value = "file/{fileName}")
+    @PostMapping(value = "file/{fileName}")
     @ResponseBody
     public List<SpeechEntity> getFileName(@PathVariable("fileName") String  file) {
 
