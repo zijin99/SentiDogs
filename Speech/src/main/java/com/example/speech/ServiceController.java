@@ -6,11 +6,14 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.speech.v1.SpeechSettings;
 import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -32,6 +35,12 @@ public class ServiceController {
          * file should include string mp4 or wav
          */
         String filePath;
+        ClassPathResource classPathResource = new ClassPathResource("static/download/");
+
+        File f = new File(classPathResource.getPath());
+        if (!f.exists()) {
+            f.mkdirs();
+        }
 
         if (file.contains(".mp4")) {
             storageService.downloadAndConvertAndUpload(file);
