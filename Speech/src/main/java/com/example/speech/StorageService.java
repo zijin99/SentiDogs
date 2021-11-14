@@ -100,7 +100,7 @@ public class StorageService {
             String baseMP4Path = mp4ClassPathResource.getPath();
 
             String wavFileName = fileFullName.split("\\.")[0] + ".wav";
-            String wavFilePath = wavClassPathResource.getPath();
+            String wavFilePath = baseClassPathResource.getPath() + wavFileName;
 
             System.out.println(wavFilePath + ">>>>>>>");
             convertInputStreamToFile(baseMP4Path, mp4InputStream);
@@ -129,7 +129,7 @@ public class StorageService {
             /**
              * this file name should include mp4 or wav
              */
-            ClassPathResource classPathResource = new ClassPathResource("static/download/" + fileFullName);
+            ClassPathResource classPathResource = new ClassPathResource("static/download/");
 //            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
             String filePath = classPathResource.getPath() + fileFullName;
             InputStream inputStream = classPathResource.getInputStream();
@@ -137,7 +137,7 @@ public class StorageService {
 
             downloadObject("test-senti-frontend",
                     "test-senti-frontend.appspot.com", fileFullName,
-                    classPathResource.getPath(), fileFullName);
+                    classPathResource.getPath() + fileFullName, fileFullName);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
