@@ -79,10 +79,10 @@ public class StorageService {
         BlobId blobId = BlobId.of(bucketName, objectName);
         BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
 
-        ClassPathResource classPathResource = new ClassPathResource(filePath);
-        InputStream inputStream = classPathResource.getInputStream();
+//        ClassPathResource classPathResource = new ClassPathResource(filePath);
+//        InputStream inputStream = classPathResource.getInputStream();
 
-        storage.create(blobInfo, inputStream.readAllBytes());
+        storage.create(blobInfo, Files.readAllBytes(Paths.get(filePath)));
 
         System.out.println(
                 "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName);
@@ -90,22 +90,24 @@ public class StorageService {
 
     public void convertToWav (String fileFullName) {
         try {
-            ClassPathResource baseClassPathResource = new ClassPathResource("static/download/");
-
-            ClassPathResource mp4ClassPathResource = new ClassPathResource("static/download/" + fileFullName);
-            InputStream mp4InputStream = mp4ClassPathResource.getInputStream();
-
-            ClassPathResource wavClassPathResource = new ClassPathResource("static/download/" + fileFullName.split("\\.")[0] + ".wav");
-
-            String baseMP4Path = mp4ClassPathResource.getPath();
+            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
+            String mp4FilePath = basePath + fileFullName;
+//            ClassPathResource baseClassPathResource = new ClassPathResource("static/download/");
+//
+//            ClassPathResource mp4ClassPathResource = new ClassPathResource("static/download/" + fileFullName);
+//            InputStream mp4InputStream = mp4ClassPathResource.getInputStream();
+//
+//            ClassPathResource wavClassPathResource = new ClassPathResource("static/download/" + fileFullName.split("\\.")[0] + ".wav");
+//
+//            String baseMP4Path = mp4ClassPathResource.getPath();
 
             String wavFileName = fileFullName.split("\\.")[0] + ".wav";
-            String wavFilePath = baseClassPathResource.getPath() + wavFileName;
+            String wavFilePath = basePath + wavFileName;
 
             System.out.println(wavFilePath + ">>>>>>>");
-            convertInputStreamToFile(baseMP4Path, mp4InputStream);
+//            convertInputStreamToFile(baseMP4Path, mp4InputStream);
 
-            File source2 = new File(baseMP4Path);
+            File source2 = new File(mp4FilePath);
             File target2 = new File(wavFilePath);
 
             AudioAttributes audio2 = new AudioAttributes();
@@ -134,10 +136,15 @@ public class StorageService {
 //            String filePath = classPathResource.getPath() + fileFullName;
 //            InputStream inputStream = classPathResource.getInputStream();
 
+            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
+            File f = new File(basePath);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
 
             downloadObject("test-senti-frontend",
                     "test-senti-frontend.appspot.com", fileFullName,
-                    classPathResource.getPath() + fileFullName, fileFullName);
+                    basePath + fileFullName, fileFullName);
             return true;
         } catch (Exception e) {
             e.printStackTrace();
