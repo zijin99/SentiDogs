@@ -131,8 +131,8 @@ public class StorageService {
              */
             ClassPathResource classPathResource = new ClassPathResource("static/download/");
 //            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
-            String filePath = classPathResource.getPath() + fileFullName;
-            InputStream inputStream = classPathResource.getInputStream();
+//            String filePath = classPathResource.getPath() + fileFullName;
+//            InputStream inputStream = classPathResource.getInputStream();
 
 
             downloadObject("test-senti-frontend",
