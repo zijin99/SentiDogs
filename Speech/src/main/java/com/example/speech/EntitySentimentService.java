@@ -4,6 +4,7 @@ import com.google.api.gax.core.CredentialsProvider;
 import com.google.cloud.language.v1.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.json.JSONObject;
 
 import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
@@ -14,6 +15,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+
 
 @Component
 public class EntitySentimentService {
@@ -29,7 +31,7 @@ public class EntitySentimentService {
         settings = LanguageServiceSettings.newBuilder().setCredentialsProvider(credentialsProvider).build();
     }
 
-    public List<SpeechEntity> analyseSpeech(String input) {
+    public List<SpeechEntity> analyseSpeech(String input, String fileType) {
         try (LanguageServiceClient language = LanguageServiceClient.create(settings)) {
             Document doc = Document.newBuilder().setContent(input).setType(Document.Type.PLAIN_TEXT).build();
             AnalyzeEntitySentimentRequest request =
@@ -39,7 +41,8 @@ public class EntitySentimentService {
                             .build();
 
             AnalyzeEntitySentimentResponse response = language.analyzeEntitySentiment(request);
-            List<SpeechEntity> entityList = new ArrayList<>();
+            List<SpeechEntity> restaurantList = new ArrayList<>();
+            List<SpeechEntity> travelList = new ArrayList<>();
             List<SpeechEntity> result = new ArrayList<>();
             // Print the response
             for (Entity entity : response.getEntitiesList()) {
@@ -58,55 +61,69 @@ public class EntitySentimentService {
 
                     System.out.printf("Type: %s\n\n", mention.getType());
                 }
-                if (entity.getType().name().equalsIgnoreCase("organization") || entity.getType().name().equalsIgnoreCase("location")) {
-                    entityList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
+                if (entity.getType().name().equalsIgnoreCase("location")) {
+                    restaurantList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), new HashMap<String, String> (entity.getMetadataMap())));
+                    travelList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
                 }
-
+                if (entity.getType().name().equalsIgnoreCase("organization")){
+                    restaurantList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
+                }
             }
 
-            //call the restaurant detector api
             var url = "https://som-restaurant-detector.azurewebsites.net/detect";
-            for (var entity: entityList) {
-                try {
+            var myurl = new URL(url);
+            if (fileType.equalsIgnoreCase("restaurant")){
+                for (var entity: restaurantList) {
+                    try {
+                        con = (HttpURLConnection) myurl.openConnection();
+                        con.setDoOutput(true);
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("User-Agent", "Java client");
+                        con.setRequestProperty("Content-Type", "application/json");
 
-                    var myurl = new URL(url);
-                    con = (HttpURLConnection) myurl.openConnection();
-
-                    con.setDoOutput(true);
-                    con.setRequestMethod("POST");
-                    con.setRequestProperty("User-Agent", "Java client");
-                    con.setRequestProperty("Content-Type", "application/json");
-
-                    var data = "{\"text\":\"" + entity.getName() + "\"}";
-                    byte[] postData = data.getBytes(StandardCharsets.UTF_8);
-                    try (var wr = new DataOutputStream(con.getOutputStream())) {
-                        wr.write(postData);
-                    }
-
-                    StringBuilder content;
-
-                    try (var br = new BufferedReader(
-                            new InputStreamReader(con.getInputStream()))) {
-
-                        String line;
-                        content = new StringBuilder();
-
-                        while ((line = br.readLine()) != null) {
-                            content.append(line);
-                            content.append(System.lineSeparator());
+                        var data = "{\"text\":\"" + entity.getName() + "\"}";
+                        byte[] postData = data.getBytes(StandardCharsets.UTF_8);
+                        try (var wr = new DataOutputStream(con.getOutputStream())) {
+                            wr.write(postData);
                         }
+
+                        StringBuilder content;
+
+                        try (var br = new BufferedReader(
+                                new InputStreamReader(con.getInputStream()))) {
+
+                            String line;
+                            content = new StringBuilder();
+
+                            while ((line = br.readLine()) != null) {
+                                content.append(line);
+                                content.append(System.lineSeparator());
+                            }
+                        }
+                        var resp = new JSONObject(content.toString());
+                        JSONObject root = (JSONObject) resp.get("rootElement");
+                        JSONObject res = (JSONObject) root.get("resp");
+                        var isRestaurant = res.get("isrestaurant").toString();
+
+                        System.out.println(content.toString());
+                        if (isRestaurant.equalsIgnoreCase("true")) {
+                            var meta = entity.getMetadataMap();
+                            meta.put("local_map",res.get("local_map").toString());
+                            result.add(entity);
+                        }
+
+                    } finally {
+
+                        con.disconnect();
                     }
-
-                    System.out.println(content.toString());
-                    if (content.toString().trim().equalsIgnoreCase("yes")) {
-                        result.add(entity);
-                    }
-
-                } finally {
-
-                    con.disconnect();
                 }
             }
+
+            else{
+
+            }
+
+
 
             return result;
         } catch (Exception e) {

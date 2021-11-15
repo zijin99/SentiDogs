@@ -29,12 +29,13 @@ public class ServiceController {
 
     @RequestMapping(value = "file/{fileName}")
     @ResponseBody
-    public List<SpeechEntity> getFileName(@PathVariable("fileName") String  file) {
+    public List<SpeechEntity> getFileName(@PathVariable("fileName") String file) {
 
         /**
          * file should include string mp4 or wav
          */
         String filePath;
+        String fileType;
         ClassPathResource classPathResource = new ClassPathResource("static/download/");
 
         File f = new File(classPathResource.getPath());
@@ -49,8 +50,13 @@ public class ServiceController {
             filePath = speechService.generatePath(file);
         }
 
+        if (file.startsWith("restaurant_"))
+            fileType = "restaurant";
+        else
+            fileType = "travel";
+
         String trans = speechService.asyncRecognizeGcs(filePath);
-        List<SpeechEntity> list = entitySentimentService.analyseSpeech(trans);
+        List<SpeechEntity> list = entitySentimentService.analyseSpeech(trans, fileType);
         List<SpeechEntity> sorted = entitySentimentService.generateList(list);
         return sorted;
     }
