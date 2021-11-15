@@ -28,6 +28,7 @@ public class ServiceController {
     private StorageService storageService;
 
     @RequestMapping(value = "file/{fileName}")
+    @CrossOrigin(origins = "*")
     @ResponseBody
     public List<SpeechEntity> getFileName(@PathVariable("fileName") String file) {
 
