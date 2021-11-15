@@ -63,10 +63,11 @@ public class EntitySentimentService {
                 }
                 if (entity.getType().name().equalsIgnoreCase("location")) {
                     restaurantList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), new HashMap<String, String> (entity.getMetadataMap())));
-                    travelList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
+                    if (entity.getMetadataMap() != null && !entity.getMetadataMap().isEmpty() && entity.getMetadataMap().containsKey("wikipedia_url"))
+                        travelList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), new HashMap<String, String> (entity.getMetadataMap())));
                 }
                 if (entity.getType().name().equalsIgnoreCase("organization")){
-                    restaurantList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), entity.getMetadataMap()));
+                    restaurantList.add(new SpeechEntity(entity.getName(), entity.getSentiment().getScore(), entity.getType().name(), new HashMap<String, String> (entity.getMetadataMap())));
                 }
             }
 
@@ -120,7 +121,47 @@ public class EntitySentimentService {
             }
 
             else{
+                for (var entity: travelList) {
+                    try {
+                        con = (HttpURLConnection) myurl.openConnection();
+                        con.setDoOutput(true);
+                        con.setRequestMethod("POST");
+                        con.setRequestProperty("User-Agent", "Java client");
+                        con.setRequestProperty("Content-Type", "application/json");
 
+                        var data = "{\"text\":\"" + entity.getName() + "\"}";
+                        byte[] postData = data.getBytes(StandardCharsets.UTF_8);
+                        try (var wr = new DataOutputStream(con.getOutputStream())) {
+                            wr.write(postData);
+                        }
+
+                        StringBuilder content;
+
+                        try (var br = new BufferedReader(
+                                new InputStreamReader(con.getInputStream()))) {
+
+                            String line;
+                            content = new StringBuilder();
+
+                            while ((line = br.readLine()) != null) {
+                                content.append(line);
+                                content.append(System.lineSeparator());
+                            }
+                        }
+                        var resp = new JSONObject(content.toString());
+                        JSONObject root = (JSONObject) resp.get("rootElement");
+                        JSONObject res = (JSONObject) root.get("resp");
+
+                        System.out.println(content.toString());
+
+                        var meta = entity.getMetadataMap();
+                        meta.put("local_map",res.get("local_map").toString());
+                        result.add(entity);
+                    } finally {
+
+                        con.disconnect();
+                    }
+                }
             }
 
 
