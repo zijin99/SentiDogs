@@ -3,29 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
+<!--     <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">-->
     <title>Upload Page and Infor List</title>
-    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+    <script
+            src="https://code.jquery.com/jquery-3.6.0.min.js"
+            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4="
+            crossorigin="anonymous"></script>
     <link href="https://unpkg.com/filepond/dist/filepond.css" rel="stylesheet">
     <link href="./css/filepond-plugin-media-preview.css" rel="stylesheet">
     <link href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     <link href="./css/upload.css" rel="stylesheet">
-    <script>
-        $(function() {
-            const place = [];
 
-            $.getJSON('./test.json', function(data) {
-                $.each(data, function(i, f) {
-                    const tblRow = "<tr>" + "<td>" + f.name + "</td>" +
-                        "<td>" + f.sentiment + "</td>" + "<td>" + "<a href=" + f.metadata.wikipedia_url+ ">"
-                        + f.name +"</a>" +  "</td>" + "<td>" + "<a href=" + f.metadata.google_maps_url+ ">"+
-                        f.name +"</a>" + "</td>" + "</tr>"
-                    $(tblRow).appendTo("#userdata tbody");
-                });
-            });
-        });
-    </script>
+
 </head>
 <body>
 <div class="container-fluid mt-3">
@@ -43,16 +34,14 @@
                         <li><a class="dropdown-item" id = "restaurant" onclick="resthelper()">Restaurant</a></li>
                     </ul>
                 </div>
-<!--                <p id="element">Type you want to upload:</p>-->
-                <progress class="progress-bar-animated progress-bar-id" value="0" max="100" id = "uploader">0%</progress>
+                <progress class="progress-bar-animated progress-bar-id" value="0" max="100" id = "uploader" style="margin-bottom: 3%">0%</progress>
                 <input type="file" value="upload" class="form-control" id="fileButton" style="border: transparent">
 
 
             </div>
-            <script
-                    src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
-            <script
-                    src="key.js"></script>
+            <script src="https://www.gstatic.com/firebasejs/live/3.0/firebase.js"></script>
+            <script src="key.js"></script>
+
             <script type="module">
 
 
@@ -65,13 +54,17 @@
                 fileButton.addEventListener('change', function (e){
                     // Get file
                     var file = e.target.files[0];
+                    let temp;
                     //Create a storage ref
-                    var type = document.getElementsByName("dropdown")[0];
-                    if(type.name === "travel"){
-                        var storageRef = firebase.storage().ref('travel/' + file.name);
+                    var type = document.getElementById("dropdownMenuButton1").innerText;
+                    console.log(type);
+                    if(type === "Travel Destination"){
+                        var storageRef = firebase.storage().ref('travel_' + file.name);
+                        temp = 'travel_' + file.name;
                     }
                     else {
-                        var storageRef = firebase.storage().ref('restaurant/' + file.name);
+                        var storageRef = firebase.storage().ref('restaurant_' + file.name);
+                        temp = 'restaurant_' + file.name;
                     }
                     // Upload file
                     var task = storageRef.put(file);
@@ -85,15 +78,53 @@
 
                         },
                         function complete(){
-                        alert("Success Upload!");
-                        }
-                    );
-                });
+                        //alert("Success Upload!");
+                            //get the table
+                            $(function() {
+                                const url = "http://54.145.128.111:8080/file/" + temp;
+                                //const url = "./test.json";
+                                axios.get(url, {
+                                    headers: {
+                                        "Access-Control-Allow-Origin": "*",
+                                    },
+                                    responseType: "json",
+                                })
+                                    .then((response) => {
+                                        const textr = response.data.transcription;
+                                        document.getElementById("textArea").innerText = textr;
+                                        console.log(response.data.transcription);
+                                    });
+                            });
+                        })
+                })
+                //         function getfeedback(){
+                //             $(function() {
+                //                 const url = "http://54.145.128.111:8080/file/" + temp;
+                //
+                //                 axios.get(url, {
+                //                     headers: {
+                //                         "Access-Control-Allow-Origin": "*",
+                //                     },
+                //                     responseType: "json",
+                //                 })
+                //                     .then((response) => {
+                //                         $.each(response.data, function(i, f) {
+                //                             const tblRow = "<tr>" + "<td>" + f.name + "</td>" +
+                //                                 "<td>" + f.sentiment + "</td>" + "<td>" + "<a href=" + f.metadataMap.wikipedia_url+ ">"
+                //                                 + f.name +"</a>" +  "</td>" + "<td>" + "<a href=" + f.metadataMap.local_map+ ">"+
+                //                                 f.name +"</a>" + "</td>" + "</tr>"
+                //                             $(tblRow).appendTo("#userdata tbody");
+                //                         });
+                //                     });
+                //             });
+                //         }
+                //     );
+                // });
+
             </script>
 
             <script src="./js/filepond-plugin-media-preview.js"></script>
             <script src="https://unpkg.com/filepond/dist/filepond.js"></script>
-
             <script src="./js/upload.js"></script>
         </div>
         <div class="div-right col">
@@ -110,6 +141,15 @@
 
                 </tbody>
             </table>
+            <div class="form-outline" style="text-align: center">
+                <p>Review the Transcript and Edit it!</p>
+
+                    <textarea class="form-control" id="textArea" rows="8" placeholder="Transcript Loading ..." style="background-color: #cdcdcd; border: black; border-image-width: auto">
+                    </textarea>
+                    <input type="submit" value="SUBMIT" class="btn btn-secondary btn-success submit-btn" onclick="submittrans()">
+
+            </div>
+
         </div>
     </div>
 </div>
