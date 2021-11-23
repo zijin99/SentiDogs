@@ -48,10 +48,10 @@ public class EntitySentimentService {
             for (Entity entity : response.getEntitiesList()) {
                 System.out.printf("Entity: %s\n", entity.getName());
                 System.out.printf("Salience: %.3f\n", entity.getSalience());
-                System.out.println("Metadata: ");
                 System.out.println("Type: " + entity.getType());
+                System.out.println("Metadata: ");
                 for (Map.Entry<String, String> entry : entity.getMetadataMap().entrySet()) {
-                    System.out.printf("%s : %s", entry.getKey(), entry.getValue());
+                    System.out.printf("%s : %s\n", entry.getKey(), entry.getValue());
                 }
                 for (EntityMention mention : entity.getMentionsList()) {
                     System.out.printf("Begin offset: %d\n", mention.getText().getBeginOffset());
@@ -163,8 +163,6 @@ public class EntitySentimentService {
                     }
                 }
             }
-
-
 
             return result;
         } catch (Exception e) {

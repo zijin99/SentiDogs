@@ -28,7 +28,31 @@ public class StorageService {
         this.credentialsProvider = credentialsProvider;
     }
 
+    public boolean downloadAndConvertAndUpload(String fileFullName) {
+        try {
+            /**
+             * this file name should include mp4 or wav
+             */
+            ClassPathResource classPathResource = new ClassPathResource("static/download/");
+//            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
+//            String filePath = classPathResource.getPath() + fileFullName;
+//            InputStream inputStream = classPathResource.getInputStream();
 
+            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
+            File f = new File(basePath);
+            if (!f.exists()) {
+                f.mkdirs();
+            }
+
+            downloadObject("test-senti-frontend",
+                    "test-senti-frontend.appspot.com", fileFullName,
+                    basePath + fileFullName, fileFullName);
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
     public void downloadObject(
             String projectId, String bucketName, String objectName, String destFilePath, String fileFullName) {
         // The ID of your GCP project
@@ -59,33 +83,6 @@ public class StorageService {
         }catch (Exception e) {
             e.printStackTrace();
         }
-    }
-
-    public void uploadObject(
-            String projectId, String bucketName, String objectName, String filePath) throws IOException {
-        // The ID of your GCP project
-        // String projectId = "your-project-id";
-
-        // The ID of your GCS bucket
-        // String bucketName = "your-unique-bucket-name";
-
-        // The ID of your GCS object
-        // String objectName = "your-object-name";
-
-        // The path to your file to upload
-        // String filePath = "path/to/your/file"
-
-        Storage storage = StorageOptions.newBuilder().setCredentials(credentialsProvider.getCredentials()).setProjectId(projectId).build().getService();
-        BlobId blobId = BlobId.of(bucketName, objectName);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-
-//        ClassPathResource classPathResource = new ClassPathResource(filePath);
-//        InputStream inputStream = classPathResource.getInputStream();
-
-        storage.create(blobInfo, Files.readAllBytes(Paths.get(filePath)));
-
-        System.out.println(
-                "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName);
     }
 
     public void convertToWav (String fileFullName) {
@@ -126,30 +123,31 @@ public class StorageService {
         }
     }
 
-    public boolean downloadAndConvertAndUpload(String fileFullName) {
-        try {
-            /**
-             * this file name should include mp4 or wav
-             */
-            ClassPathResource classPathResource = new ClassPathResource("static/download/");
-//            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
-//            String filePath = classPathResource.getPath() + fileFullName;
-//            InputStream inputStream = classPathResource.getInputStream();
+    public void uploadObject(
+            String projectId, String bucketName, String objectName, String filePath) throws IOException {
+        // The ID of your GCP project
+        // String projectId = "your-project-id";
 
-            String basePath = ResourceUtils.getURL("classpath:").getPath() + "static/download/";
-            File f = new File(basePath);
-            if (!f.exists()) {
-                f.mkdirs();
-            }
+        // The ID of your GCS bucket
+        // String bucketName = "your-unique-bucket-name";
 
-            downloadObject("test-senti-frontend",
-                    "test-senti-frontend.appspot.com", fileFullName,
-                    basePath + fileFullName, fileFullName);
-            return true;
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return false;
+        // The ID of your GCS object
+        // String objectName = "your-object-name";
+
+        // The path to your file to upload
+        // String filePath = "path/to/your/file"
+
+        Storage storage = StorageOptions.newBuilder().setCredentials(credentialsProvider.getCredentials()).setProjectId(projectId).build().getService();
+        BlobId blobId = BlobId.of(bucketName, objectName);
+        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
+
+//        ClassPathResource classPathResource = new ClassPathResource(filePath);
+//        InputStream inputStream = classPathResource.getInputStream();
+
+        storage.create(blobInfo, Files.readAllBytes(Paths.get(filePath)));
+
+        System.out.println(
+                "File " + filePath + " uploaded to bucket " + bucketName + " as " + objectName);
     }
 
     public void convertInputStreamToFile(String filePath, InputStream inputStream) {

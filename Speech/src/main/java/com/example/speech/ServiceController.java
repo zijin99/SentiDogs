@@ -14,7 +14,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class ServiceController {
@@ -30,7 +32,7 @@ public class ServiceController {
     @RequestMapping(value = "file/{fileName}")
     @CrossOrigin(origins = "*")
     @ResponseBody
-    public List<SpeechEntity> getFileName(@PathVariable("fileName") String file) {
+    public Map<String, String> getFileName(@PathVariable("fileName") String file) {
 
         /**
          * file should include string mp4 or wav
@@ -57,7 +59,18 @@ public class ServiceController {
             fileType = "travel";
 
         String trans = speechService.asyncRecognizeGcs(filePath);
-        List<SpeechEntity> list = entitySentimentService.analyseSpeech(trans, fileType);
+        Map<String, String> returnMap = new HashMap<String, String>();
+        returnMap.put("fileType", fileType);
+        returnMap.put("transcription", trans);
+
+        return returnMap;
+    }
+
+    @PostMapping(value = "/analyze")
+    @CrossOrigin(origins = "*")
+    @ResponseBody
+    public List<SpeechEntity> postText(@RequestBody Map<String, String> requestMap) {
+        List<SpeechEntity> list = entitySentimentService.analyseSpeech(requestMap.get("transcription"), requestMap.get("fileType"));
         List<SpeechEntity> sorted = entitySentimentService.generateList(list);
         return sorted;
     }
