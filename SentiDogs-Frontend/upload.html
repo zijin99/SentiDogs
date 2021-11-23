@@ -58,14 +58,19 @@
                     //Create a storage ref
                     var type = document.getElementById("dropdownMenuButton1").innerText;
                     console.log(type);
+                    if (type !== "Travel Destination" && type !== "Restaurant"){
+                        alert("Choose a Type");
+                        location.reload();
+                    }
                     if(type === "Travel Destination"){
                         var storageRef = firebase.storage().ref('travel_' + file.name);
                         temp = 'travel_' + file.name;
                     }
-                    else {
+                    if (type === "Restaurant"){
                         var storageRef = firebase.storage().ref('restaurant_' + file.name);
                         temp = 'restaurant_' + file.name;
                     }
+
                     // Upload file
                     var task = storageRef.put(file);
                     //Update progress bar
@@ -91,35 +96,14 @@
                                 })
                                     .then((response) => {
                                         const textr = response.data.transcription;
+                                        const typetext = response.data.fileType;
+
                                         document.getElementById("textArea").innerText = textr;
-                                        console.log(response.data.transcription);
+                                        console.log(response.data.fileType);
                                     });
                             });
                         })
                 })
-                //         function getfeedback(){
-                //             $(function() {
-                //                 const url = "http://54.145.128.111:8080/file/" + temp;
-                //
-                //                 axios.get(url, {
-                //                     headers: {
-                //                         "Access-Control-Allow-Origin": "*",
-                //                     },
-                //                     responseType: "json",
-                //                 })
-                //                     .then((response) => {
-                //                         $.each(response.data, function(i, f) {
-                //                             const tblRow = "<tr>" + "<td>" + f.name + "</td>" +
-                //                                 "<td>" + f.sentiment + "</td>" + "<td>" + "<a href=" + f.metadataMap.wikipedia_url+ ">"
-                //                                 + f.name +"</a>" +  "</td>" + "<td>" + "<a href=" + f.metadataMap.local_map+ ">"+
-                //                                 f.name +"</a>" + "</td>" + "</tr>"
-                //                             $(tblRow).appendTo("#userdata tbody");
-                //                         });
-                //                     });
-                //             });
-                //         }
-                //     );
-                // });
 
             </script>
 
@@ -144,7 +128,8 @@
             <div class="form-outline" style="text-align: center">
                 <p>Review the Transcript and Edit it!</p>
 
-                    <textarea class="form-control" id="textArea" rows="8" placeholder="Transcript Loading ..." style="background-color: #cdcdcd; border: black; border-image-width: auto">
+                    <textarea class="form-control" id="textArea" rows="8" placeholder="Transcript Loading ..." style="background-color: #cdcdcd; border: black; border-image-width: auto"
+                    onchange="submittrans()">
                     </textarea>
                     <input type="submit" value="SUBMIT" class="btn btn-secondary btn-success submit-btn" onclick="submittrans()">
 
