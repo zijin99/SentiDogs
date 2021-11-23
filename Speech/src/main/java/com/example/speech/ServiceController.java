@@ -70,6 +70,9 @@ public class ServiceController {
     @CrossOrigin(origins = "*")
     @ResponseBody
     public List<SpeechEntity> postText(@RequestBody Map<String, String> requestMap) {
+        System.out.println("Entered post request");
+        System.out.println(requestMap.get("transcription") + " and " + requestMap.get("fileType"));
+
         List<SpeechEntity> list = entitySentimentService.analyseSpeech(requestMap.get("transcription"), requestMap.get("fileType"));
         List<SpeechEntity> sorted = entitySentimentService.generateList(list);
         return sorted;
