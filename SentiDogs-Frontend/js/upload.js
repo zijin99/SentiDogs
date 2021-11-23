@@ -22,7 +22,7 @@ function resthelper(){
 
 
 function submittrans(input){
-
+    loading_control.start();
     $(function() {
         const url = "http://54.145.128.111:8080/analyze";
         const fileType = temp
@@ -37,6 +37,7 @@ function submittrans(input){
                         + f.name +"</a>" +  "</td>" + "<td>" + "<a href=" + f.metadataMap.local_map+ ">"+
                         f.name +"</a>" + "</td>" + "</tr>"
                     $(tblRow).appendTo("#userdata tbody");
+                    loading_control.stop();
                 });
             });
     });
