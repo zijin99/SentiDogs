@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.810.11
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SentimentAnalysisAPI", "SentimentAnalysisAPI.csproj", "{2EBD48A7-74D1-4653-A177-B35BC90E2EAC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantDetector", "RestaurantDetector.csproj", "{2EBD48A7-74D1-4653-A177-B35BC90E2EAC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
